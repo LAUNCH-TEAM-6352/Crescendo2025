@@ -3,25 +3,19 @@ package frc.robot.subsystems;
 import java.io.File;
 import java.io.IOException;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.PathPlannerConstants;
 import frc.robot.Constants.SwerveConstants;
 import swervelib.SwerveDrive;
+import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
-import swervelib.math.SwerveMath;
 
 public class DriveTrain extends SubsystemBase
 {
@@ -44,9 +38,6 @@ public class DriveTrain extends SubsystemBase
                             steeringConversionFactor, driveConversionFactor);
 
             SmartDashboard.putNumber("swerve/baseRadius", swerveDrive.swerveDriveConfiguration.getDriveBaseRadiusMeters());
-
-            setupPathPlanner();
-
         } catch (IOException exception)
         {
             exception.printStackTrace();
@@ -69,44 +60,6 @@ public class DriveTrain extends SubsystemBase
     public void drive(ChassisSpeeds velocity)
     {
         swerveDrive.drive(velocity);
-    }
-
-    public void setupPathPlanner()
-    {
-        RobotConfig config = null;
-        try
-        {
-            config = RobotConfig.fromGUISettings();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        
-        AutoBuilder.configure(
-            this::getPose, // Robot pose supplier
-            this::resetOdometry, // Method to reset odometry (will be called if your auto has a starting
-                                    // pose)
-            this::getRobotVelocity, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-            (speeds, feedForwards) -> setChassisSpeeds(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-            new PPHolonomicDriveController(
-                // Translation PID constants
-                PathPlannerConstants.TRANSLATION_PID,
-                // Rotation PID constants
-                PathPlannerConstants.ANGLE_PID
-            ),
-            config,
-            () ->
-            {
-                // Boolean supplier that controls when the path will be mirrored for the red
-                // alliance
-                // This will flip the path being followed to the red side of the field.
-                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-                var alliance = DriverStation.getAlliance();
-                return alliance.isPresent() ? alliance.get() == DriverStation.Alliance.Red : false;
-            },
-            this // Reference to this subsystem to set requirements
-        );
     }
 
     /**

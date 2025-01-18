@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Indexer;
-import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.Shooter;
 
 /**
@@ -23,7 +22,6 @@ public class ShootNoteIntoSpeaker extends Command
 {
     private final Indexer indexer;
     private final Shooter shooter;
-    private final Manipulator manipulator;
     private String timeoutKey = null;
     private long stopTime;
 
@@ -34,18 +32,17 @@ public class ShootNoteIntoSpeaker extends Command
      * 
      * @param indexer
      */
-    public ShootNoteIntoSpeaker(Indexer indexer, Shooter shooter, Manipulator manipulator)
+    public ShootNoteIntoSpeaker(Indexer indexer, Shooter shooter)
     {
         this.indexer = indexer;
         this.shooter = shooter;
-        this.manipulator = manipulator;
         // Specify required subsystems
-        addRequirements(indexer, shooter, manipulator);
+        addRequirements(indexer, shooter);
     }
 
-    public ShootNoteIntoSpeaker(Indexer indexer, Shooter shooter, Manipulator manipulator, String timeoutKey)
+    public ShootNoteIntoSpeaker(Indexer indexer, Shooter shooter, String timeoutKey)
     {
-        this(indexer, shooter, manipulator);
+        this(indexer, shooter);
         this.timeoutKey = timeoutKey;
     }
 
@@ -53,7 +50,6 @@ public class ShootNoteIntoSpeaker extends Command
     @Override
     public void initialize()
     {
-        manipulator.moveToSpeakerPosition();
         shooter.setSpeakerSpeed();
         hasShooterBeenFed = false;
 
@@ -78,7 +74,6 @@ public class ShootNoteIntoSpeaker extends Command
     public void end(boolean interrupted)
     {
         indexer.stop();
-        manipulator.moveToIntakePosition();
         shooter.stop();
     }
 

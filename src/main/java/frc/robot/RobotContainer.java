@@ -7,20 +7,16 @@ package frc.robot;
 import frc.robot.commands.DriveWithGamepad;
 import frc.robot.commands.EjectNote;
 import frc.robot.commands.IntakeNote;
-import frc.robot.commands.ShootNoteIntoAmp;
 import frc.robot.commands.ShootNoteIntoSpeaker;
-import frc.robot.commands.Wait;
 import frc.robot.commands.test.TestDriveTrain;
 import frc.robot.commands.test.TestIndexer;
 import frc.robot.commands.test.TestIntake;
-import frc.robot.commands.test.TestManipulator;
 import frc.robot.commands.test.TestShooter;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.Constants.PneumaticsConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.DashboardConstants.AutoKeys;
 import frc.robot.Constants.DashboardConstants.IndexerKeys;
@@ -29,23 +25,17 @@ import frc.robot.Constants.DashboardConstants.ShooterKeys;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Manipulator;
 import frc.robot.subsystems.Shooter;
 
 import java.util.Optional;
 
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -59,14 +49,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer
 {
-    // Pneumatics:
-    private final Optional<Compressor> compressor;
-
     // Subsystems:
     private final Optional<DriveTrain> driveTrain;
     private final Optional<Intake> intake;
     private final Optional<Indexer> indexer;
-    private final Optional<Manipulator> manipulator;
     private final Optional<Shooter> shooter;
 
     // OI devices:
@@ -91,8 +77,6 @@ public class RobotContainer
         // -i- Intake
         // -s- Shooter
         // -idx- Indexer
-        // -m- Manipulator
-        // -p- Pneumatics
         // -cam- Camera
 
         var gameData = DriverStation.getGameSpecificMessage().toLowerCase();
@@ -124,11 +108,6 @@ public class RobotContainer
             driverGamepad = new XboxController(OperatorConstants.driverGamepadPort);
         }
 
-        // Create pneumatics compressor:
-        compressor = gameData.isBlank() || gameData.contains("-p-")
-            ? Optional.of(new Compressor(PneumaticsConstants.moduleId, PneumaticsConstants.moduleType))
-            : Optional.empty();
-
         // Create subsystems:
         driveTrain = gameData.isBlank() || gameData.contains("-dt-")
             ? Optional.of(new DriveTrain())
@@ -142,16 +121,9 @@ public class RobotContainer
             ? Optional.of(new Indexer())
             : Optional.empty();
 
-        manipulator = gameData.isBlank() || gameData.contains("-m-")
-            ? Optional.of(new Manipulator())
-            : Optional.empty();
-
         shooter = gameData.isBlank() || gameData.contains("-s-")
             ? Optional.of(new Shooter())
             : Optional.empty();
-
-        // Configure commands for Path Planner:
-        configurePathPlannerNamedCommands();
 
         // Configure default commands
         configureDefaultCommands();
@@ -162,18 +134,6 @@ public class RobotContainer
         // Configure smart dashboard
         configureSmartDashboard();
 
-    }
-
-    /**
-     * Configure named commands for Path Planner.
-     */
-    private void configurePathPlannerNamedCommands()
-    {
-        NamedCommands.registerCommand("Shoot Wait", new Wait(AutoKeys.shootWaitTime));
-        NamedCommands.registerCommand("Shoot Speaker",
-            new ShootNoteIntoSpeaker(indexer.get(), shooter.get(), manipulator.get(), AutoKeys.shootTimeout));
-        NamedCommands.registerCommand("Intake Note",
-            new IntakeNote(intake.get(), indexer.get(), manipulator.get(), AutoKeys.intakeTimeout));
     }
 
     /**
@@ -201,49 +161,21 @@ public class RobotContainer
      */
     private void configureBindings()
     {
-        if (intake.isPresent() && indexer.isPresent() && manipulator.isPresent())
+        if (intake.isPresent() && indexer.isPresent())
         {
-            configureBindings(intake.get(), indexer.get(), manipulator.get());
+            configureBindings(intake.get(), indexer.get());
         }
 
-        if (indexer.isPresent() && shooter.isPresent() && manipulator.isPresent())
+        if (indexer.isPresent() && shooter.isPresent())
         {
-            configureBindings(indexer.get(), shooter.get(), manipulator.get());
+            configureBindings(indexer.get(), shooter.get());
         }
-
-        manipulator.ifPresent(this::configureBindings);
-    }
-
-    /**
-     * Configure bindings that only involve the manipulator.
-     */
-    private void configureBindings(Manipulator manipulator)
-    {
-        if (codriverGamepad == null)
-        {
-            return;
-        }
-
-        new JoystickButton(codriverGamepad, Button.kLeftBumper.value)
-            .onTrue(new InstantCommand(() -> manipulator.moveToIntakePosition()));
-
-        new JoystickButton(codriverGamepad, Button.kRightBumper.value)
-            .onTrue(new InstantCommand(() -> manipulator.moveToClimbingPosition()));
-
-        new JoystickButton(codriverGamepad, Button.kLeftStick.value)
-            .onTrue(new InstantCommand(() -> manipulator.climb()));
-
-        new JoystickButton(codriverGamepad, Button.kRightStick.value)
-            .onTrue(new InstantCommand(() -> manipulator.climbOff()));
-
-        // new JoystickButton(codriverGamepad, Button.kStart.value)
-        // .onTrue(new InstantCommand(() -> manipulator.climbLockOff()));
     }
 
     /**
      * Configures bindings for intaking and ejecting notes.
      */
-    private void configureBindings(Intake intake, Indexer indexer, Manipulator manipulator)
+    private void configureBindings(Intake intake, Indexer indexer)
     {
         if (codriverGamepad == null)
         {
@@ -251,16 +183,16 @@ public class RobotContainer
         }
 
         new JoystickButton(codriverGamepad, Button.kA.value)
-            .whileTrue(new IntakeNote(intake, indexer, manipulator));
+            .whileTrue(new IntakeNote(intake, indexer));
 
         new JoystickButton(codriverGamepad, Button.kB.value)
-            .whileTrue(new EjectNote(intake, indexer, manipulator));
+            .whileTrue(new EjectNote(intake, indexer));
     }
 
     /**
      * Configures bindings for shooting notes into speaker and amp.
      */
-    private void configureBindings(Indexer indexer, Shooter shooter, Manipulator manipulator)
+    private void configureBindings(Indexer indexer, Shooter shooter)
     {
         if (codriverGamepad == null)
         {
@@ -268,23 +200,18 @@ public class RobotContainer
         }
 
         new JoystickButton(codriverGamepad, Button.kY.value)
-            .whileTrue(new ShootNoteIntoSpeaker(indexer, shooter, manipulator));
-
-        new JoystickButton(codriverGamepad, Button.kX.value)
-            .whileTrue(new ShootNoteIntoAmp(indexer, shooter, manipulator));
+            .whileTrue(new ShootNoteIntoSpeaker(indexer, shooter));
     }
 
     private void configureSmartDashboard()
     {
         driveTrain.ifPresent(this::configureSmartDashboard);
-        compressor.ifPresent(this::configureSmartDashboard);
         intake.ifPresent(this::configureSmartDashboard);
         indexer.ifPresent(this::configureSmartDashboard);
         shooter.ifPresent(this::configureSmartDashboard);
 
         // Configure chooser widgets:
         configureDriveOrientationChooser(driveOrientationChooser);
-        configureAutoChooser(autoChooser);
 
         // Configure parameters used by auto routines:
         configureAutoParameters();
@@ -300,11 +227,6 @@ public class RobotContainer
     private void configureSmartDashboard(DriveTrain driveTrain)
     {
 
-    }
-
-    private void configureSmartDashboard(Compressor compressor)
-    {
-        SmartDashboard.putData(compressor);
     }
 
     private void configureSmartDashboard(Intake intake)
@@ -343,31 +265,6 @@ public class RobotContainer
         SmartDashboard.putData("Drive Orientation", driveOrientationChooser);
     }
 
-    private void configureAutoChooser(SendableChooser<Command> autoChooser)
-    {
-        //Shoot Twice Autos
-        autoChooser.addOption("Center Sub Shoot Twice", new PathPlannerAuto("SubMiddleShootTwice"));
-        autoChooser.addOption("Source Sub Shoot Twice", new PathPlannerAuto("SubSourceShootTwice"));
-        autoChooser.addOption("Amp Sub Shoot Twice", new PathPlannerAuto("SubAmpShootTwice"));
-        
-        //Shoot and Leave Autos
-        autoChooser.addOption("Center Sub Shoot & Leave", getShootFromSubMiddleAndLeaveCommand());
-        autoChooser.addOption("Source Sub Shoot & Leave", getShootFromSubSourceAndLeaveCommand());
-        autoChooser.addOption("Amp Sub Shoot & Leave", getShootFromSubAmpAndLeaveCommand());
-
-        //Shoot Autos
-        autoChooser.addOption("Center Sub Shoot", new PathPlannerAuto("SubMiddleShoot"));
-        autoChooser.addOption("Source Sub Shoot", new PathPlannerAuto("SubSourceShoot"));
-        autoChooser.addOption("Amp Sub Shoot",  new PathPlannerAuto("SubAmpShoot"));
-
-        //Other
-        autoChooser.addOption("Leave From Source", new PathPlannerAuto("Leave"));
-        autoChooser.addOption("Leave From Source, Return and Shoot", new PathPlannerAuto("SourceLeaveAndShoot"));
-
-
-        SmartDashboard.putData("Auto Selection", autoChooser);
-    }
-
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
@@ -375,7 +272,7 @@ public class RobotContainer
      */
     public Command getAutonomousCommand()
     {
-        return autoChooser.getSelected();
+        return null;
     }
 
     /**
@@ -405,35 +302,6 @@ public class RobotContainer
             group.addCommands(new TestShooter(shooter.get()));
         }
 
-        if (manipulator.isPresent())
-        {
-            group.addCommands(new TestManipulator(manipulator.get()));
-        }
-
         return group;
-    }
-
-    public Command getShootFromSubAmpAndLeaveCommand()
-    {
-        return new SequentialCommandGroup(
-            new Wait(AutoKeys.shootTimeout),
-            new ShootNoteIntoSpeaker(indexer.get(), shooter.get(), manipulator.get()).withTimeout(5),
-            new PathPlannerAuto("LeaveSubAmp"));
-    }
-
-    public Command getShootFromSubMiddleAndLeaveCommand()
-    {
-        return new SequentialCommandGroup(
-            new Wait(AutoKeys.shootTimeout),
-            new ShootNoteIntoSpeaker(indexer.get(), shooter.get(), manipulator.get()).withTimeout(5),
-            new PathPlannerAuto("LeaveSubMiddle"));
-    }
-
-    public Command getShootFromSubSourceAndLeaveCommand()
-    {
-        return new SequentialCommandGroup(
-            new Wait(AutoKeys.shootTimeout),
-            new ShootNoteIntoSpeaker(indexer.get(), shooter.get(), manipulator.get()).withTimeout(5),
-            new PathPlannerAuto("LeaveSubSource"));
     }
 }

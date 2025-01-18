@@ -7,7 +7,6 @@ package frc.robot;
 import com.pathplanner.lib.config.PIDConstants;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 /**
@@ -156,12 +155,6 @@ public final class Constants
             public static final double minOutput = -1;
             public static final double maxOutput = 1;
         }
-    }
-
-    public static final class PneumaticsConstants
-    {
-        public static final int moduleId = 0;
-        public static final PneumaticsModuleType moduleType = PneumaticsModuleType.CTREPCM;
     }
 
     public static final class SwerveConstants

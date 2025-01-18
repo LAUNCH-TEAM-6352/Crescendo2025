@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Manipulator;
 
 /**
  * IntakeNote intakes a note from the floor
@@ -18,7 +17,6 @@ public class IntakeNote extends Command
 {
     private final Intake intake;
     private final Indexer indexer;
-    private final Manipulator manipulator;
     private String timeoutKey = null;
     private long stopTime;
 
@@ -27,25 +25,23 @@ public class IntakeNote extends Command
      * 
      * @param intake
      */
-    public IntakeNote(Intake intake, Indexer indexer, Manipulator manipulator)
+    public IntakeNote(Intake intake, Indexer indexer)
     {
         this.intake = intake;
         this.indexer = indexer;
-        this.manipulator = manipulator;
         // Specify required subsystems
-        addRequirements(intake, indexer, manipulator);
+        addRequirements(intake, indexer);
     }
 
-    public IntakeNote(Intake intake, Indexer indexer, Manipulator manipulator, String timeoutKey)
+    public IntakeNote(Intake intake, Indexer indexer, String timeoutKey)
     {
-        this(intake , indexer, manipulator);
+        this(intake , indexer);
         this.timeoutKey = timeoutKey;
     }
     
     @Override
     public void initialize()
     {
-        manipulator.moveToIntakePosition();
         indexer.intake();
         intake.intake();
 
