@@ -29,7 +29,6 @@ import frc.robot.subsystems.Shooter;
 
 import java.util.Optional;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
@@ -81,14 +80,6 @@ public class RobotContainer
 
         var gameData = DriverStation.getGameSpecificMessage().toLowerCase();
         SmartDashboard.putString("Game Data", gameData);
-
-        // Start a camera server for a simple USB camera:
-        if (gameData.contains("-cam-") || gameData.isBlank())
-        {
-            var camera = CameraServer.startAutomaticCapture();
-            camera.setFPS(CameraConstants.fps);
-            camera.setResolution(CameraConstants.width, CameraConstants.height);
-        }
 
         // Create OI devices:
         if (gameData.contains("-oi-"))
