@@ -13,7 +13,6 @@ import frc.robot.commands.test.TestIndexer;
 import frc.robot.commands.test.TestIntake;
 import frc.robot.commands.test.TestShooter;
 import frc.robot.Constants.AutoConstants;
-import frc.robot.Constants.CameraConstants;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.OperatorConstants;
