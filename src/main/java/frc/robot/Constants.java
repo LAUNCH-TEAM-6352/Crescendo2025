@@ -157,11 +157,6 @@ public final class Constants
         }
     }
 
-    public static final class PneumaticsConstants
-    {
-        public static final int moduleId = 0;
-        public static final PneumaticsModuleType moduleType = PneumaticsModuleType.CTREPCM;
-    }
 
     public static final class SwerveConstants
     {
