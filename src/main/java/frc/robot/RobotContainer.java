@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -55,7 +56,6 @@ public class RobotContainer
 
     // OI devices:
     private final XboxController driverGamepad;
-    private final XboxController codriverGamepad;
 
     SendableChooser<Boolean> driveOrientationChooser = new SendableChooser<>();
     SendableChooser<Command> autoChooser = new SendableChooser<>();
@@ -87,14 +87,10 @@ public class RobotContainer
             driverGamepad = DriverStation.isJoystickConnected(OperatorConstants.driverGamepadPort)
                 ? new XboxController(OperatorConstants.driverGamepadPort)
                 : null;
-            codriverGamepad = DriverStation.isJoystickConnected(OperatorConstants.codriverGamepadPort)
-                ? new XboxController(OperatorConstants.codriverGamepadPort)
-                : null;
         }
         else
         {
             // In competition, don't take chances and always create all OI devices:
-            codriverGamepad = new XboxController(OperatorConstants.codriverGamepadPort);
             driverGamepad = new XboxController(OperatorConstants.driverGamepadPort);
         }
 
@@ -104,7 +100,7 @@ public class RobotContainer
             : Optional.empty();
 
         intake = gameData.isBlank() || gameData.contains("-i-")
-            ? Optional.of(new Intake(codriverGamepad))
+            ? Optional.of(new Intake(driverGamepad))
             : Optional.empty();
 
         indexer = gameData.isBlank() || gameData.contains("-idx-")
@@ -167,15 +163,15 @@ public class RobotContainer
      */
     private void configureBindings(Intake intake, Indexer indexer)
     {
-        if (codriverGamepad == null)
+        if (driverGamepad == null)
         {
             return;
         }
 
-        new JoystickButton(codriverGamepad, Button.kA.value)
+        new JoystickButton(driverGamepad, Button.kA.value)
             .whileTrue(new IntakeNote(intake, indexer));
 
-        new JoystickButton(codriverGamepad, Button.kB.value)
+        new JoystickButton(driverGamepad, Button.kB.value)
             .whileTrue(new EjectNote(intake, indexer));
     }
 
@@ -184,12 +180,12 @@ public class RobotContainer
      */
     private void configureBindings(Indexer indexer, Shooter shooter)
     {
-        if (codriverGamepad == null)
+        if (driverGamepad == null)
         {
             return;
         }
 
-        new JoystickButton(codriverGamepad, Button.kY.value)
+        new JoystickButton(driverGamepad, Button.kY.value)
             .whileTrue(new ShootNoteIntoSpeaker(indexer, shooter));
     }
 
@@ -271,6 +267,9 @@ public class RobotContainer
     public Command getTestCommand()
     {
         var group = new SequentialCommandGroup();
+        
+        // Wait for startup messages to be logged to driver station console:
+        group.addCommands(new WaitCommand(5));
 
         if (driveTrain.isPresent())
         {

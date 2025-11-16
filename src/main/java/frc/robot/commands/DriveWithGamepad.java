@@ -68,7 +68,9 @@ public class DriveWithGamepad extends Command
 
     private double applyDeadbandAndSensitivity(double input)
     {
-        return (Math.abs(input) < OperatorConstants.gamepadDeadband) ? 0.0 : Math.pow(input, 2) * Math.signum(input);
+        return (Math.abs(input) < OperatorConstants.gamepadDeadband)
+            ? 0.0
+            : Math.pow(Math.abs(input), 3) * Math.signum(input);
     }
 
     @Override

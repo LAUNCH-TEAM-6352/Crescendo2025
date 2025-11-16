@@ -47,8 +47,8 @@ public final class Constants
 
     public static final class IndexerConstants
     {
-        public static final int lowerRollerMotorChannel = 43;
-        public static final int upperRollerMotorChannel = 44;
+        public static final int lowerRollerMotorChannel = 44;
+        public static final int upperRollerMotorChannel = 43;
 
         public static final double lowerRollerMotorIntakeRpm = 2100;
         public static final double upperRollerMotorIntakeRpm = 2100;
@@ -77,13 +77,13 @@ public final class Constants
 
         public static final class UpperPIDConstants
         {
-            public static final double kP = 0.00001;
-            public static final double kI = 0.0000035;
-            public static final double kD = 3.0;
+            public static final double kP = 0.000035;
+            public static final double kI = 0.00000035;
+            public static final double kD = 0.0;
             public static final int kIZ = 0;
-            public static final double kFF = 0.00009;
-            public static final double minOutput = -1;
-            public static final double maxOutput = 1;
+            public static final double kFF = 0.0;
+            public static final double minOutput = -1.0;
+            public static final double maxOutput = 1.0;
         }
     }
 
@@ -161,7 +161,7 @@ public final class Constants
     public static final class SwerveConstants
     {
         public static final double wheelDiameter = 4;
-        public static final double maximumLinearVelocityMps = 10.0;
+        public static final double maximumLinearVelocityMps = 5.0;
         public static final double maximumRotationRateRps = 4 * Math.PI;
 
         // Don't mess with this!
@@ -177,7 +177,7 @@ public final class Constants
     public static class DriveConstants
     {
         public static final boolean isFieldRelative = true;
-        public static final TelemetryVerbosity swerveDriveTelemetryVerbosity = TelemetryVerbosity.MACHINE;
+        public static final TelemetryVerbosity swerveDriveTelemetryVerbosity = TelemetryVerbosity.HIGH;
     }
 
     public static class TestConstants

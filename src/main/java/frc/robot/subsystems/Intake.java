@@ -54,8 +54,6 @@ public class Intake extends SubsystemBase
             motor.clearFaults();
         }
 
-        
-
         this.gamepad = gamepad;
     }
 

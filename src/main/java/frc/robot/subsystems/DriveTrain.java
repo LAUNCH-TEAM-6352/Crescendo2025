@@ -6,14 +6,12 @@ import java.io.IOException;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.SwerveConstants;
 import swervelib.SwerveDrive;
-import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 
@@ -28,14 +26,8 @@ public class DriveTrain extends SubsystemBase
         {
             SwerveDriveTelemetry.verbosity = DriveConstants.swerveDriveTelemetryVerbosity;
             File swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
-            double driveConversionFactor = SwerveMath.calculateMetersPerRotation(
-                            Units.inchesToMeters(SwerveConstants.wheelDiameter), SwerveConstants.gearRatioDriveMk4);
-            SmartDashboard.putNumber("SwerveDriveConversionFactor", driveConversionFactor);
-            double steeringConversionFactor = SwerveMath.calculateDegreesPerSteeringRotation(SwerveConstants.gearRatioSteerMk4);
-            SmartDashboard.putNumber("SwerveSteeringConversionFactor", steeringConversionFactor);
 
-            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(SwerveConstants.maxModuleSpeedMps,
-                            steeringConversionFactor, driveConversionFactor);
+            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(SwerveConstants.maxModuleSpeedMps);
 
             SmartDashboard.putNumber("swerve/baseRadius", swerveDrive.swerveDriveConfiguration.getDriveBaseRadiusMeters());
         } catch (IOException exception)
