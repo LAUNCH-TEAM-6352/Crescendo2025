@@ -15,10 +15,12 @@ public class TestSwerveModuleAngleMotor extends Command
 {
     private final SwerveMotor motor;
     private final double percentOutput;
+    private final String moduleName;
 
     public TestSwerveModuleAngleMotor(DriveTrain driveTrain, String moduleName, double percentOutput)
     {
         this.motor = driveTrain.swerveDrive.getModuleMap().get(moduleName).getAngleMotor();
+        this.moduleName = moduleName;
         this.percentOutput = percentOutput;
         addRequirements(driveTrain);
     }
@@ -27,6 +29,7 @@ public class TestSwerveModuleAngleMotor extends Command
     @Override
     public void initialize()
     {
+        System.out.println("Testing Steer Motor: " + moduleName + (percentOutput > 0 ? " CCW" : " CW"));
     }
 
     // Called every time the scheduler runs while the command is scheduled.

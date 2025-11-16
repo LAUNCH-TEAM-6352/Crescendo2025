@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IndexerConstants;
 import frc.robot.Constants.DashboardConstants.IndexerKeys;
 import frc.robot.Constants.IndexerConstants.UpperPIDConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.IndexerConstants.LowerPIDConstants;
 
 public class Indexer extends SubsystemBase

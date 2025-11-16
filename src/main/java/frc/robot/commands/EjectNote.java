@@ -3,7 +3,6 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Manipulator;
 
 /**
  * EjectNote intakes a note from the floor
@@ -15,26 +14,23 @@ public class EjectNote extends Command
 {
     private final Intake intake;
     private final Indexer indexer;
-    private final Manipulator manipulator;
 
     /**
      * 
      *
      * @param intake
      */
-    public EjectNote(Intake intake, Indexer indexer, Manipulator manipulator)
+    public EjectNote(Intake intake, Indexer indexer)
     {
         this.intake = intake;
         this.indexer = indexer;
-        this.manipulator = manipulator;
         // Specify required subsystems
-        addRequirements(intake, indexer, manipulator);
+        addRequirements(intake, indexer);
     }
 
     @Override
     public void initialize()
     {
-        manipulator.moveToIntakePosition();
         intake.eject();
         indexer.eject();
     }
